@@ -10,6 +10,10 @@ const compat = new FlatCompat({
 });
 
 const eslintConfig = [
+  {
+    // 👇 This is where you add ignore patterns
+    ignores: ["**/._*", "lib/generated/**", ".next/**", "node_modules/**", "dist/**"],
+  },
   ...compat.extends("next/core-web-vitals", "next/typescript"),
 ];
 
