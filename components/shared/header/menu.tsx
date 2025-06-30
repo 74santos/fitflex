@@ -19,7 +19,7 @@ export default function MenuSheet() {
       </Link>
 
       <Button>
-        <Link href="/login" className="flex items-center gap-2">
+        <Link href="/sign-in" className="flex items-center gap-2">
           <UserIcon className="w-6 h-6  hover:text-black" />
           Sign In
         </Link>

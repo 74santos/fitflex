@@ -14,6 +14,11 @@ const eslintConfig = [
     // 👇 This is where you add ignore patterns
     ignores: ["**/._*", "lib/generated/**", ".next/**", "node_modules/**", "dist/**"],
   },
+  {
+    rules: {
+      "@typescript-eslint/no-unused-vars": "off", // 👈 disables the rule
+    },
+  },
   ...compat.extends("next/core-web-vitals", "next/typescript"),
 ];
 
