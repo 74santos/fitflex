@@ -1,3 +1,4 @@
+// app/(auth)/sign-in/page.tsx
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Metadata } from "next";
 import Link from "next/link";
@@ -12,12 +13,15 @@ export const metadata: Metadata = {
   title: "Sign In",
 };
 
+type SearchParams = Record<string, string | string[] | undefined>;
+
 interface SignInPageProps {
-  searchParams?: Promise<Record<string, string | string[] | undefined>>;
+  searchParams?: Promise<SearchParams>;
 }
-export default async function SignInPage(props: SignInPageProps) {
-  const searchParams = await props.searchParams;
-  const rawCallbackUrl = searchParams?.callbackUrl;
+export default async function SignInPage({ searchParams }: SignInPageProps) {
+  // Await the Promise here:
+  const resolvedSearchParams = await searchParams;
+  const rawCallbackUrl = resolvedSearchParams?.callbackUrl;
   const callbackUrl = typeof rawCallbackUrl === "string" ? rawCallbackUrl : "/";
 
   const session = await getServerSession(authOptions);
@@ -40,9 +44,7 @@ export default async function SignInPage(props: SignInPageProps) {
             />
           </Link>
           <CardTitle className="text-center text-2xl">Sign In</CardTitle>
-          <CardDescription className="text-center">
-            Sign in to your account
-          </CardDescription>
+          <CardDescription className="text-center">Sign in to your account</CardDescription>
         </CardHeader>
 
         <CardContent className="space-y-4">
