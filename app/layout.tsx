@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Ubuntu, Inter} from "next/font/google";
 import "./globals.css";
+import AuthSessionProvider from "@/components/providers/session-provider"; 
 import { APP_NAME, APP_DESCRIPTION, SERVER_URL } from "@/lib/constants";
 import { ThemeProvider } from "next-themes";
 
@@ -40,7 +41,9 @@ export default function RootLayout({
        enableSystem
        disableTransitionOnChange
        >
+         <AuthSessionProvider >
         {children}
+        </AuthSessionProvider>
        </ThemeProvider>
 
       </body>

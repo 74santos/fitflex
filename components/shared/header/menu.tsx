@@ -1,12 +1,15 @@
 import Link from "next/link";
-import { EllipsisVertical, ShoppingCart, UserIcon } from "lucide-react";
+import { EllipsisVertical, ShoppingCart } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import ModeToggle from "./mode-toggle";
 import { Sheet, SheetContent, SheetDescription, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
+import UserButton from "./user-button";
 
 export default function MenuSheet() {
   return (
 
+
+    // Regular nav
     <div className="flex items-center space-x-4">
     <nav className="hidden md:flex w-full max-w-xs gap-4">
       <ModeToggle />
@@ -17,14 +20,13 @@ export default function MenuSheet() {
           3
         </span>
       </Link>
-
-      <Button>
-        <Link href="/sign-in" className="flex items-center gap-2">
-          <UserIcon className="w-6 h-6  hover:text-black" />
-          Sign In
-        </Link>
-      </Button>
+      <UserButton />  
+     
     </nav>
+
+
+
+    {/* responsive sheet */}
     <nav className="md:hidden p-8">
        <Sheet>
         <SheetTrigger className="align-middle">
@@ -42,12 +44,7 @@ export default function MenuSheet() {
       </Link>
         </Button>
 
-        <Button>
-        <Link href="/login" className="flex items-center gap-2">
-          <UserIcon className="w-6 h-6  hover:text-black" />
-          Sign In
-        </Link>
-      </Button>
+        <UserButton /> 
 
         <SheetDescription> </SheetDescription>
        </SheetContent>
