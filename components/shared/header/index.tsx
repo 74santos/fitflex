@@ -27,7 +27,7 @@ export default function Header() {
       <div className="max-w-screen-xl mx-auto px-4 sm:px-6 lg:px-8 flex items-center justify-between h-16">
         <Link
           href="/"
-          className="text-2xl font-bold tracking-tight text-gray-900 font-inter"
+          className="cursor-pointer"
         >
           <Image
             src={logoSrc}

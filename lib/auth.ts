@@ -53,6 +53,17 @@ export const authOptions: AuthOptions = {
       if (user) {
         token.id = user.id;
         token.role = user.role;
+
+       //If user has no name then use the email
+       if (user.name === 'NO_NAME') {
+        token.name = user.email?.split('@')[0] ?? 'guest'
+
+       // Update database to reflect the token name
+        await prisma.user.update({
+          where: { id: user.id },
+          data: { name: token.name },
+         })
+        }
       }
       return token;
     },
@@ -61,7 +72,9 @@ export const authOptions: AuthOptions = {
       if (session.user) {
         session.user.id = token.id as string;
         session.user.role = token.role as string;
+        session.user.name = token.name as string;
       }
+       console.log(token) 
 
       if (trigger === "update" && user?.name) {
         session.user.name = user.name;

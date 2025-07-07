@@ -4,6 +4,8 @@ import "./globals.css";
 import AuthSessionProvider from "@/components/providers/session-provider"; 
 import { APP_NAME, APP_DESCRIPTION, SERVER_URL } from "@/lib/constants";
 import { ThemeProvider } from "next-themes";
+import { Toaster } from "@/components/ui/sonner"
+
 
 const inter = Inter({
   variable: "--font-inter",
@@ -43,6 +45,7 @@ export default function RootLayout({
        >
          <AuthSessionProvider >
         {children}
+        <Toaster />
         </AuthSessionProvider>
        </ThemeProvider>
 
