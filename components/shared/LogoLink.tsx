@@ -9,7 +9,7 @@ import { APP_NAME } from "@/lib/constants";
 export default function LogoLink() {
   const { resolvedTheme } = useTheme();
 
-  const logoSrc = resolvedTheme === "dark" ? "/images/fwtlogo.png" : "/images/logo.png";
+  const logoSrc = resolvedTheme === "dark" ? "/images/fwhtlogo.png" : "/images/logo.png";
 
   return (
     <Link href="/" className="flex-center">

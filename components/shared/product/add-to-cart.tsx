@@ -20,10 +20,13 @@ export default function AddToCart({ cart, item }: AddToCartProps) {
   const handleClick = () => {
     startTransition(() => {
       addItemToCart(item)
-        .then((res) => {
+        .then((res) => { 
+
+          // Trigger cart refresh in header
+           document.dispatchEvent(new Event("cart-updated"))
+
           toast(res.message, {
             // description: res.description,
-
             action: {
               label: "View Cart",
               onClick: () => router.push("/cart"),
@@ -40,6 +43,7 @@ export default function AddToCart({ cart, item }: AddToCartProps) {
     startTransition(() => {
       removeItemFromCart(item.productId)
         .then((res) => {
+          document.dispatchEvent(new Event("cart-updated"))
           toast(res.message);        
         })
         .catch(() => {

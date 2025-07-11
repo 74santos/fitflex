@@ -7,15 +7,43 @@ import { useState, useEffect } from "react";
 import { APP_NAME } from "@/lib/constants";
 import MenuSheet from "./menu";
 import { useTheme } from "next-themes";
+import type { CartItem } from "@/types"
 
 export default function Header() {
   const { theme, systemTheme } = useTheme()
   // const {isOpen, setIsOpen} = useState(false)
   const [mounted, setMounted] = useState(false);
+  const [cartQty, setCartQty] = useState(0)
 
   useEffect(() => {
     setMounted(true)
-  }, [])
+  
+    async function fetchCart() {
+      try {
+        const res = await fetch("/api/cart")
+        const cart = await res.json()
+        const totalQty = cart?.items?.reduce(
+          (sum: number, item: CartItem) => sum + item.qty,
+          0
+        ) || 0
+        setCartQty(totalQty)
+      } catch (error) {
+        console.error("Failed to fetch cart:", error)
+      }
+    }
+  
+    fetchCart()
+  
+    // 👂 Listen for cart updates
+    const onCartUpdate = () => fetchCart()
+    document.addEventListener("cart-updated", onCartUpdate)
+  
+    return () => {
+      document.removeEventListener("cart-updated", onCartUpdate)
+    }
+  }, [setCartQty])
+
+
   if (!mounted) return null
   const currentTheme = theme === 'system' ? systemTheme : theme
   const logoSrc = currentTheme === 'dark'
@@ -67,7 +95,7 @@ export default function Header() {
 
         {/* Icons */}
        
-        <MenuSheet />
+        <MenuSheet cartQty={cartQty}/>
         
      
 

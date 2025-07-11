@@ -34,69 +34,84 @@ const calcPrice = (items: CartItem[]) => {
 export async function addItemToCart(input: CartItem) {
   const data = cartItemSchema.parse(input)
 
-  // 2.1 Fetch product and validate
-  const product = await prisma.product.findUnique({
-    where: { id: data.productId },
-    select: { id: true, price: true, stock: true },
-  })
-  if (!product) throw new Error("Product not found")
-  if (product.stock < data.qty) throw new Error("Not enough stock")
+// 2.1 Fetch product and validate
+const product = await prisma.product.findUnique({
+  where: { id: data.productId },
+  select: { id: true, price: true, stock: true },
+});
+if (!product) throw new Error("Product not found");
 
   // 3. Auth or Guest Session Handling
-  const session = await getServerSession(authOptions)
-  const userId: string | undefined = session?.user?.id
-  let sessionCartId: string | undefined
+const session = await getServerSession(authOptions);
+const userId: string | undefined = session?.user?.id;
+let sessionCartId: string | undefined;
 
-  if (!userId) {
-    const cookieStore = await cookies()
-    sessionCartId = cookieStore.get("sessionCartId")?.value
+if (!userId) {
+  const cookieStore = await cookies();
+  sessionCartId = cookieStore.get("sessionCartId")?.value;
 
-    if (!sessionCartId) {
-      sessionCartId = randomUUID()
-      cookieStore.set("sessionCartId", sessionCartId, {
-        path: "/",
-        httpOnly: true,
-        sameSite: "lax",
-        maxAge: 60 * 60 * 24 * 7,
-      })
-    }
+  if (!sessionCartId) {
+    sessionCartId = randomUUID();
+    cookieStore.set("sessionCartId", sessionCartId, {
+      path: "/",
+      httpOnly: true,
+      sameSite: "lax",
+      maxAge: 60 * 60 * 24 * 7,
+    });
   }
+}
 
-  const sessionCartIdToUse = sessionCartId ?? randomUUID()
+const sessionCartIdToUse = sessionCartId ?? randomUUID();
 
   // 4. Upsert Cart
-  const cart = await prisma.cart.upsert({
-    where: userId
-      ? { userId }
-      : { sessionCartId: sessionCartIdToUse },
-    update: {},
-    create: {
-      userId: userId ?? null,
-      sessionCartId: sessionCartIdToUse,
-      items: [],
-      itemsPrice: 0,
-      totalPrice: 0,
-      shippingPrice: 0,
-      taxPrice: 0,
-    },
-  })
-
-  // 5. Merge items
-  const existingItems = cart.items as CartItem[]
-  const index = existingItems.findIndex(
-    (item) =>
-      item.productId === data.productId &&
-      item.variant === data.variant
-  )
-
-  if (index !== -1) {
-    existingItems[index].qty += data.qty
+  const existingCart = await prisma.cart.findFirst({
+    where: userId ? { userId } : { sessionCartId: sessionCartIdToUse },
+  });
+  
+  let cart;
+  if (existingCart) {
+    cart = existingCart;
   } else {
-    existingItems.push({
-      ...data,
-      price: product.price.toString(), // Set server-verified price
-    })
+    cart = await prisma.cart.create({
+      data: {
+        userId: userId ?? null,
+        sessionCartId: sessionCartIdToUse,
+        items: [],
+        itemsPrice: 0,
+        totalPrice: 0,
+        shippingPrice: 0,
+        taxPrice: 0,
+      },
+    });
   }
+  
+  // 🔄 5. Merge items (and check stock)
+const existingItems = cart.items as CartItem[];
+const index = existingItems.findIndex(
+  (item) =>
+    item.productId === data.productId && item.variant === data.variant
+);
+
+// 🔍 Calculate intended total qty
+const currentQty = index !== -1 ? existingItems[index].qty : 0;
+const intendedQty = currentQty + 1;
+
+if (intendedQty > product.stock) {
+  return {
+    success: false,
+    message: `Only ${product.stock} in stock. You've reached the limit.`,
+  };
+}
+
+// ✅ Add item
+if (index !== -1) {
+  existingItems[index].qty += 1;
+} else {
+  existingItems.push({
+    ...data,
+    price: product.price.toString(), // server-verified price
+  });
+}
   // console.log("🛒 Cart Items Before Price Calc:", existingItems)
 
   // 6. Recalculate totals
@@ -150,9 +165,24 @@ export async function getCart() {
 
   if (!cart) return null
 
+   // 🛒 Enrich each cart item with current stock from DB
+   const enrichedItems = await Promise.all(
+    (cart.items as CartItem[]).map(async (item) => {
+      const product = await prisma.product.findUnique({
+        where: { id: item.productId },
+        select: { stock: true },
+      });
+
+      return {
+        ...item,
+        stock: product?.stock ?? 0, // default to 0 if product not found
+      };
+    })
+  );
+
   return convertToPlainObject({
     ...cart,
-    items: cart.items as CartItem[],
+    items: enrichedItems,
     itemsPrice: cart.itemsPrice.toString(),
     totalPrice: cart.totalPrice.toString(),
     shippingPrice: cart.shippingPrice.toString(),

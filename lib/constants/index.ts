@@ -10,3 +10,11 @@ export const signInDefaultValues = {
   email: '',
   password: '',
 }
+
+export const shippingAddressDefaultValues = {
+  fullName: '',
+  streetAddress: '',
+  city: '',
+  postalCode: '',
+  country: '',
+}
