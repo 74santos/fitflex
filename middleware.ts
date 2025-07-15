@@ -1,37 +1,60 @@
 // middleware.ts
-import { getToken } from "next-auth/jwt"
-import { NextResponse } from "next/server"
-import type { NextRequest } from "next/server"
+import { getToken } from "next-auth/jwt";
+import { NextResponse } from "next/server";
+import type { NextRequest } from "next/server";
 
 export async function middleware(request: NextRequest) {
-  const token = await getToken({ req: request })
+  const token = await getToken({ req: request });
+  const isAuth = !!token;
+  const pathname = request.nextUrl.pathname;
 
-  const isAuth = !!token
-  const isAuthPage = request.nextUrl.pathname.startsWith("/login")
-  
+  const protectedPaths = [
+    "/cart",
+    "/checkout",
+    "/shipping-address",
+    "/payment-method",
+    "/place-order",
+    "/profile",
+    "/user",
+    "/order",
+  ];
 
-  if (token?.role !== "admin") {
-    return NextResponse.redirect(new URL("/unauthorized", request.url))
+  const isProtected = protectedPaths.some((path) =>
+    pathname.startsWith(path)
+  );
+
+  const isAuthPage = pathname.startsWith("/sign-in");
+
+  // ✅ Redirect logged-in users away from sign-in page
+  if (isAuth && isAuthPage) {
+    return NextResponse.redirect(new URL("/", request.url));
   }
 
-  if (isAuthPage && isAuth) {
-    // Already logged in, redirect to home
-    return NextResponse.redirect(new URL("/", request.url))
+  // ✅ Require login for protected paths
+  if (!isAuth && isProtected) {
+    return NextResponse.redirect(
+      new URL(`/sign-in?callbackUrl=${encodeURIComponent(request.nextUrl.pathname)}`, request.url)
+    );
   }
 
-  const isProtectedPath = ["/cart", "/checkout"].some((path) =>
-    request.nextUrl.pathname.startsWith(path)
-  )
+  // ✅ Optional: admin-only route (e.g., /admin) — leave for later
+  // if (pathname.startsWith("/admin") && token?.role !== "admin") {
+  //   return NextResponse.redirect(new URL("/unauthorized", request.url));
+  // }
 
-  if (!isAuth && isProtectedPath) {
-    // Not logged in, redirect to login
-    return NextResponse.redirect(new URL("/login", request.url))
-  }
-
-  return NextResponse.next()
+  return NextResponse.next();
 }
-
 
 export const config = {
-  matcher: ["/cart/:path*", "/checkout/:path*", "/login"],
-}
+  matcher: [
+    "/cart/:path*",
+    "/checkout/:path*",
+    "/shipping-address/:path*",
+    "/payment-method/:path*",
+    "/place-order/:path*",
+    "/profile/:path*",
+    "/user/:path*",
+    "/order/:path*",
+    "/sign-in", // so we can redirect logged-in users away
+  ],
+};

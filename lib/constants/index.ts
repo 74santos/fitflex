@@ -1,4 +1,5 @@
 
+
 export const APP_NAME = process.env.NEXT_PUBLIC_APP_NAME || "FitFlex"
 export const APP_DESCRIPTION = "Gear up. Power up. Feel the Flex."
 
@@ -18,3 +19,9 @@ export const shippingAddressDefaultValues = {
   postalCode: '',
   country: '',
 }
+
+export const PAYENT_METHODS= process.env.PAYMENT_METHODS
+? process.env.PAYMENT_METHODS.split(',').map((s) => s.trim())
+: ['PayPal', 'Stripe', 'CashOnDelivery'];
+
+export const DEFAULT_PAYMENT_METHOD = process.env.DEFAULT_PAYMENT_METHOD || 'PayPal';

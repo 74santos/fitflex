@@ -2,7 +2,7 @@
 import { PrismaAdapter } from "@next-auth/prisma-adapter";
 import CredentialsProvider from "next-auth/providers/credentials";
 import { prisma } from "@/db/prisma";
-import { compareSync } from "bcrypt-ts-edge";
+import { compare } from "bcryptjs";
 import type { AuthOptions } from "next-auth";
 
 export const authOptions: AuthOptions = {
@@ -15,32 +15,30 @@ export const authOptions: AuthOptions = {
         password: { type: "password" },
       },
       async authorize(credentials) {
-        if (!credentials) return null;
+        if (!credentials?.email || !credentials?.password) return null;
 
         const user = await prisma.user.findFirst({
           where: { email: credentials.email },
         });
 
-        if (user && user.password) {
-          const isMatch = compareSync(credentials.password, user.password);
-          if (isMatch) {
-            return {
-              id: user.id,
-              name: user.name,
-              email: user.email,
-              role: user.role,
-            };
-          }
-        }
+        if (!user || !user.password) return null;
 
-        return null;
+        const isMatch = await compare(credentials.password, user.password);
+        if (!isMatch) return null;
+
+        return {
+          id: user.id,
+          name: user.name,
+          email: user.email,
+          role: user.role,
+        };
       },
     }),
   ],
 
   session: {
     strategy: "jwt",
-    maxAge: 30 * 24 * 60 * 60,
+    maxAge: 30 * 24 * 60 * 60, // 30 days
   },
 
   pages: {
@@ -54,15 +52,17 @@ export const authOptions: AuthOptions = {
         token.id = user.id;
         token.role = user.role;
 
-       //If user has no name then use the email
-       if (user.name === 'NO_NAME') {
-        token.name = user.email?.split('@')[0] ?? 'guest'
+        // Generate name if missing
+        if (!user.name || user.name === "NO_NAME") {
+          const generatedName = user.email?.split("@")[0] ?? "guest";
+          token.name = generatedName;
 
-       // Update database to reflect the token name
-        await prisma.user.update({
-          where: { id: user.id },
-          data: { name: token.name },
-         })
+          await prisma.user.update({
+            where: { id: user.id },
+            data: { name: generatedName },
+          });
+        } else {
+          token.name = user.name;
         }
       }
       return token;
@@ -74,7 +74,6 @@ export const authOptions: AuthOptions = {
         session.user.role = token.role as string;
         session.user.name = token.name as string;
       }
-       console.log(token) 
 
       if (trigger === "update" && user?.name) {
         session.user.name = user.name;
