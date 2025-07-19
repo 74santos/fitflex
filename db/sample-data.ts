@@ -99,7 +99,7 @@ const sampleData = {
         "High-quality whey isolate for lean muscle and fast recovery.",
       images: [
         "/images/fitFlex-products/p4-1.jpg",
-        "/images/fitFlex-products/p4-1.jpg",
+        "/images/fitFlex-products/p4-2.jpg",
       ],
       price: 49.95,
       brand: "FitFlex Nutrition",
@@ -119,7 +119,7 @@ const sampleData = {
         "Breathable, moisture-wicking compression shirt for intense training.",
       images: [
         "/images/fitFlex-products/p3-1.jpg",
-        "/images/fitFlex-products/p3-1.jpg",
+        "/images/fitFlex-products/p3-3.jpg",
       ],
       price: 39.99,
       brand: "FitFlex",
@@ -136,7 +136,7 @@ const sampleData = {
       description: "Lightweight joggers with 4-way stretch and zip pockets.",
       images: [
         "/images/fitFlex-products/p3-2.jpg",
-        "/images/fitFlex-products/p3-2.jpg",
+        "/images/fitFlex-products/p3-3.jpg",
       ],
       price: 59.5,
       brand: "FitFlex",
@@ -174,7 +174,7 @@ const sampleData = {
         "Nootropic blend designed to enhance focus, clarity, and memory.",
       images: [
         "/images/fitFlex-products/p4-1.jpg",
-        "/images/fitFlex-products/p4-1.jpg",
+        "/images/fitFlex-products/p4-2.jpg",
       ],
       price: 34.99,
       brand: "FitFlex Labs",
@@ -192,7 +192,7 @@ const sampleData = {
         "High-quality whey isolate for lean muscle and fast recovery.",
       images: [
         "/images/fitFlex-products/p4-2.jpg",
-        "/images/fitFlex-products/p4-2.jpg",
+        "/images/fitFlex-products/p4-1.jpg",
       ],
       price: 49.95,
       brand: "FitFlex Nutrition",
@@ -210,7 +210,7 @@ const sampleData = {
         "Trusted whey protein formula for performance and endurance.",
       images: [
         "/images/fitFlex-products/p4-3.jpg",
-        "/images/fitFlex-products/p4-3.jpg",
+        "/images/fitFlex-products/p4-2.jpg",
       ],
       price: 64.99,
       brand: "Optimum Nutrition",
