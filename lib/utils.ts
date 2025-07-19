@@ -40,3 +40,43 @@ export function formatCurrency(amount:number | string | null) {
     return "NaN";
   }
 }
+
+
+export function formatId(id: string) {
+  return `..${id.substring(id.length -6)}`
+}
+
+//Format date and time
+export const formatDateTime = (dateString: Date) => {
+  const dateTimeOptions: Intl.DateTimeFormatOptions = {
+   month: "short",
+   day: "numeric",
+   year: "numeric",
+   hour: "numeric",
+   minute: "numeric",
+   hour12: true, 
+  }
+  const dateOptions: Intl.DateTimeFormatOptions = {
+   weekday: "short",
+   month: "short",
+   day: "numeric",
+   year: "numeric",
+  }
+   
+  const timeOptions: Intl.DateTimeFormatOptions = {
+   hour: "numeric",
+   minute: "numeric",
+   hour12: true, 
+  }
+  
+  const formattedDateTime : string = new Date(dateString).toLocaleString("en-US", dateTimeOptions);
+  const formattedDate: string = new Date(dateString).toLocaleDateString("en-US", dateOptions);
+  const formattedTime: string = new Date(dateString).toLocaleTimeString("en-US", timeOptions);
+
+
+  return {
+    dateTime: formattedDate,
+    dateOnly: formattedTime,
+    timeOnly: formattedDateTime
+  }
+}
