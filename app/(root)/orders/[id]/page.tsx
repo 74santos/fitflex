@@ -3,6 +3,8 @@ import { notFound } from "next/navigation"
 import { getOrderById } from "@/lib/actions/order.actions"
 import type { Order, ShippingAddress } from "@/types"
 import OrderDetailsTable from "./order-details-table"
+import { getServerSession } from "next-auth"
+import { authOptions } from "@/lib/auth"
 
 export const metadata: Metadata = {
   title: "Order Details",
@@ -15,15 +17,20 @@ export default async function OrderDetailsPage(props: { params: Promise<{ id: st
   const order = await getOrderById(params.id)
   if (!order) return notFound();
 
+  const session = await getServerSession(authOptions);
+  if (!session) return notFound();
+
   const address = order.shippingAddress as ShippingAddress;
 
   return (
     <OrderDetailsTable
       order={{ ...order, shippingAddress: address } as Order}
       paypalClientId={process.env.PAYPAL_CLIENT_ID || 'sb'}
+      isAdmin={ session?.user?.role === 'admin' || false }
     />
   );
 }
+
 
 
 
@@ -76,26 +83,3 @@ export default async function OrderDetailsPage(props: { params: Promise<{ id: st
 
 
 
-
-// export default async function OrderDetailsPage({ 
-//   params 
-// }: { 
-//   params: { id: string } 
-// }) {
-//   const order = await getOrderById(params.id)
-
-//   if (!order) notFound()
-
-  
-
-//   const address = order.shippingAddress as ShippingAddress
-
-//   return (
-  
-//     <OrderDetailsTable order={{
-//       ...order,
-//       shippingAddress: address
-//     } as Order} />
-  
-//   )
-// }

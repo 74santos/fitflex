@@ -3,15 +3,17 @@
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { Button } from "@/components/ui/button";
 import { formatCurrency, formatDateTime, formatId } from "@/lib/utils"
 import { Order } from "@/types"
 import Link from "next/link";
 import Image from "next/image";
+import { useTransition } from "react";
 import { PayPalScriptProvider, PayPalButtons , usePayPalScriptReducer } from "@paypal/react-paypal-js";
-import { createPayPalOrder, approvePayPalOrder } from "@/lib/actions/order.actions";
+import { createPayPalOrder, approvePayPalOrder, updatedOrderToPaidCOD, deliverOrder} from "@/lib/actions/order.actions";
 import { toast } from "sonner";
 
-export default function OrderDetailsTable({ order, paypalClientId }: { order: Order; paypalClientId: string }) {
+export default function OrderDetailsTable({ order, paypalClientId, isAdmin }: { order: Order; paypalClientId: string; isAdmin: boolean }) {
 
   const {
     id,
@@ -28,6 +30,7 @@ export default function OrderDetailsTable({ order, paypalClientId }: { order: Or
     deliveredAt
   } = order;
 
+  // PayPal script reducer it is used to get the status of the PayPal script
   const PrintLoadingState = () => {
     const [{ isPending, isRejected }] = usePayPalScriptReducer()
    let status = '';
@@ -40,6 +43,7 @@ export default function OrderDetailsTable({ order, paypalClientId }: { order: Or
    return status
   }
 
+  // Create PayPal order
   const handleCreatePayPalOrder = async () => {
     const res = await createPayPalOrder(order.id)
     
@@ -51,12 +55,60 @@ export default function OrderDetailsTable({ order, paypalClientId }: { order: Or
     return res.data
   }
 
-
+// Approve PayPal order
    const handleApprovePayPalOrder = async (data:{orderID: string}) => {
     const res = await approvePayPalOrder(order.id, data)
    toast(res.message)
     
   }
+
+  // Button to mark order as paid
+  const MarkAsPaidButton = () => {
+    const [isPending, startTransition] = useTransition();
+    return (
+      <Button 
+      type="button"
+      onClick={() => startTransition( async () => {
+      const res = await updatedOrderToPaidCOD(order.id)
+
+      if(res.success) {
+        toast.success(res.message)
+      } else {
+        toast.error(res.message)
+      }
+      })} 
+      disabled={isPending} 
+      >
+        {isPending ? "Marking as paid..." : "Mark as paid"}
+      </Button>
+    )
+  }
+
+// Button to mark order as delivered
+   const MarkAsDeliveredButton = () => {
+    const [isPending, startTransition] = useTransition();
+    return (
+      <Button 
+      type="button"
+      onClick={() => startTransition( async () => {
+      const res = await deliverOrder(order.id)
+
+      if(res.success) {
+        toast.success(res.message)
+      } else {
+        toast.error(res.message)
+      }
+      })} 
+      disabled={isPending} 
+      >
+        {isPending ? "processing..." : "Mark as delivered"}
+      </Button>
+    )
+  }
+
+
+
+
 
 
   return (
@@ -89,7 +141,7 @@ export default function OrderDetailsTable({ order, paypalClientId }: { order: Or
                </p>
               { isDelivered ? (
                 <Badge variant='secondary'>
-                  Paid at { formatDateTime(deliveredAt!).dateTime }
+                 Delivered at { formatDateTime(deliveredAt!).dateTime }
                 </Badge>
               ) : (
                 <Badge variant='destructive'>
@@ -166,7 +218,18 @@ export default function OrderDetailsTable({ order, paypalClientId }: { order: Or
                           </PayPalScriptProvider> 
                           </div>
                         )}
-
+                      {/* Cash on Delivery */}
+                      {
+                        isAdmin && !isPaid && paymentMethod === 'CashOnDelivery' && (
+                          <MarkAsPaidButton/>
+                        )
+                      }
+                        {
+                        isAdmin && isPaid && !isDelivered && (
+                          <MarkAsDeliveredButton/>
+                        )
+                      }
+                      
                     </CardContent>
                   </Card>
                  
