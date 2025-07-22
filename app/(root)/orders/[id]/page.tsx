@@ -1,7 +1,6 @@
 import { Metadata } from "next"
 import { notFound } from "next/navigation"
 import { getOrderById } from "@/lib/actions/order.actions"
-// import { formatCurrency } from "@/lib/utils"
 import type { Order, ShippingAddress } from "@/types"
 import OrderDetailsTable from "./order-details-table"
 
@@ -9,33 +8,21 @@ export const metadata: Metadata = {
   title: "Order Details",
 }
 
-export default async function OrderDetailsPage( props: {
-  params: Promise<{
-    id: string
-  }>
-}) {
+export default async function OrderDetailsPage(props: { params: Promise<{ id: string }> }) {
+  // Await params if it's a Promise
+  const params = await props.params
 
-  const {id} = await props.params
-  
-  const order = await getOrderById(id)
+  const order = await getOrderById(params.id)
+  if (!order) return notFound();
 
-  if (!order) notFound()
-
-  
-
-  const address = order.shippingAddress as ShippingAddress
+  const address = order.shippingAddress as ShippingAddress;
 
   return (
-  
-    <OrderDetailsTable order={{
-      ...order,
-      shippingAddress: address
-    } as Order} 
-    paypalClientId={process.env.PAYPAL_CLIENT_ID || 'sb'}
-    
+    <OrderDetailsTable
+      order={{ ...order, shippingAddress: address } as Order}
+      paypalClientId={process.env.PAYPAL_CLIENT_ID || 'sb'}
     />
-  
-  )
+  );
 }
 
 

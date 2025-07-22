@@ -1,0 +1,73 @@
+import Pagination from "@/components/shared/pagination"
+import { Button } from "@/components/ui/button"
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
+import { getAllOrders } from "@/lib/actions/order.actions"
+import { requireAdmin } from "@/lib/auth-guard"
+import { formatCurrency, formatDateTime, formatId } from "@/lib/utils"
+import { Metadata } from "next"
+import Link from "next/link"
+
+export const metadata: Metadata = {
+  title: "Admin Orders",
+}
+
+
+export default async function AdminOrderspage(props: {
+  searchParams: Promise<{page: string}>
+}) {
+
+  const { page = '1' } =  await props.searchParams
+
+  await requireAdmin()
+
+  const orders = await getAllOrders({
+    page: Number(page),
+    // limit: 2
+  })
+
+  console.log(orders)
+
+
+  return (
+    <div className="space-y-2">
+    <h2 className="text-2xl font-bold">Orders</h2>
+    <div className="overflow-x-auto">
+     <Table>
+       <TableHeader>
+         <TableRow>
+           <TableHead>ID</TableHead>
+           <TableHead>Date</TableHead>
+           <TableHead>TOTAL</TableHead>
+           <TableHead>PAID</TableHead>
+           <TableHead>DELIVERED</TableHead>
+           <TableHead>ACTIONS</TableHead>
+         </TableRow>
+       </TableHeader>
+       <TableBody>
+         {orders.data.map((order) => (
+           <TableRow key={order.id} >
+             <TableCell>{formatId(order.id)}</TableCell>
+             <TableCell>{formatDateTime(order.createdAt).dateTime}</TableCell>
+             <TableCell>{formatCurrency(order.totalPrice)}</TableCell>
+             <TableCell>{order.isPaid && order.paidAt ? formatDateTime(order.paidAt).dateTime : 'Not Paid'}</TableCell>
+             <TableCell>{order.isDelivered && order.deliveredAt ? formatDateTime(order.deliveredAt).dateTime : 'Not Delivered'}</TableCell>
+             <TableCell>
+               <Button asChild variant='outline' size='sm'>
+               <Link href={`/orders/${order.id}`}>
+                 Details
+               </Link>
+               </Button>
+              {/* DELETE */}
+             </TableCell>
+           </TableRow>
+         ))}
+       </TableBody>
+     </Table>
+     {
+       orders.totalPages > 1 && (
+         <Pagination page={ Number(page) || 1 } totalPages={orders?.totalPages} urlParamName="page"/>
+       )
+     }
+    </div>
+   </div>
+  )}

@@ -47,7 +47,7 @@ export const authOptions: AuthOptions = {
   },
 
   callbacks: {
-    async jwt({ token, user }) {
+    async jwt({ token, user, trigger, session }) {
       if (user) {
         token.id = user.id;
         token.role = user.role;
@@ -56,7 +56,8 @@ export const authOptions: AuthOptions = {
         if (!user.name || user.name === "NO_NAME") {
           const generatedName = user.email?.split("@")[0] ?? "guest";
           token.name = generatedName;
-
+    
+          // Update database to reflect the token name
           await prisma.user.update({
             where: { id: user.id },
             data: { name: generatedName },
@@ -65,6 +66,12 @@ export const authOptions: AuthOptions = {
           token.name = user.name;
         }
       }
+      
+      // Handle session updates
+      if (trigger === "update" && session?.user.name) {
+        token.name = session.user.name;
+      }
+
       return token;
     },
 

@@ -60,6 +60,21 @@ export default function UserButton() {
             </div>
           </div>
         </DropdownMenuLabel>
+
+        <DropdownMenuLabel>
+            <Link href="/user/profile" className=" w-full">User Profile</Link>
+          </DropdownMenuLabel>
+          
+          <DropdownMenuLabel>
+            <Link href="/user/orders" className=" w-full">Order History</Link>
+          </DropdownMenuLabel>
+
+          {session?.user?.role === "admin" && (
+            <DropdownMenuLabel>
+              <Link href="/admin/overview" className=" w-full">Admin Dashboard</Link>
+            </DropdownMenuLabel>
+          )}
+
         <DropdownMenuItem onClick={handleSignOut} className="cursor-pointer">
           <LogOutIcon className="w-4 h-4 mr-2" />
           Sign Out

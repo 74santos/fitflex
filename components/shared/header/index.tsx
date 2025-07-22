@@ -52,7 +52,7 @@ export default function Header() {
 
   return (
     <header className=" bg-secondary shadow-sm sticky top-0 z-50">
-      <div className="max-w-screen-xl mx-auto px-4 sm:px-6 lg:px-8 flex items-center justify-between h-16">
+      <div className="max-w-screen-xl mx-auto px-4 sm:px-6 lg:px-4 flex items-center justify-between h-16">
         <Link
           href="/"
           className="cursor-pointer"

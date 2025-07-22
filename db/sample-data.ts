@@ -34,6 +34,7 @@ const sampleData = {
       stock: 5,
       isFeatured: true,
       banner: "banner-1.jpg",
+      sortOrder: 5,
     },
     {
       name: "SpinRide Elite",
@@ -52,6 +53,7 @@ const sampleData = {
       stock: 3,
       isFeatured: true,
       banner: "banner-2.jpg",
+      sortOrder: 1 ,
     },
     {
       name: "All-In-One Gym Station",
@@ -70,6 +72,7 @@ const sampleData = {
       stock: 2,
       isFeatured: false,
       banner: null,
+      sortOrder: 3,
     },
     {
       name: "PowerTower Max",
@@ -88,6 +91,7 @@ const sampleData = {
       stock: 9,
       isFeatured: true,
       banner: "banner-2.jpg",
+      sortOrder: 2,
     },
 
     // NUTRITION
@@ -108,6 +112,7 @@ const sampleData = {
       stock: 15,
       isFeatured: true,
       banner: "banner-3.jpg",
+      sortOrder: 11,
     },
 
     // CLOTHING
@@ -128,6 +133,7 @@ const sampleData = {
       stock: 20,
       isFeatured: true,
       banner: null,
+      sortOrder: 4,
     },
     {
       name: "Performance Joggers",
@@ -145,6 +151,7 @@ const sampleData = {
       stock: 18,
       isFeatured: false,
       banner: null,
+      sortOrder: 8,
     },
     {
       name: "FitFlex Training Hoodie",
@@ -163,6 +170,7 @@ const sampleData = {
       stock: 8,
       isFeatured: true,
       banner: null,
+      sortOrder: 9,
     },
 
     // SUPPLEMENTS
@@ -183,6 +191,7 @@ const sampleData = {
       stock: 30,
       isFeatured: false,
       banner: null,
+      sortOrder: 10,
     },
     {
       name: "ISO-X Lean Protein",
@@ -201,6 +210,7 @@ const sampleData = {
       stock: 15,
       isFeatured: true,
       banner: "banner-3.jpg",
+      sortOrder: 6,
     },
     {
       name: "ON Whey Gold Standard",
@@ -219,6 +229,7 @@ const sampleData = {
       stock: 10,
       isFeatured: true,
       banner: null,
+      sortOrder: 7,
     },
   ],
 };
