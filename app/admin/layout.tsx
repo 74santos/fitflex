@@ -20,12 +20,12 @@ export default function AdminLayout({
 <div className="bg-secondary shadow-sm ">
       <div className="border-b container mx-auto">
         <div className="flex items-center h-16 px-2">
-
+   
         <Link
           href="/"
           className="cursor-pointer"
         >
-          <ThemeSwitcher />
+        <ThemeSwitcher />
         </Link>
         <MainNav className="mx-6" />
         <div className="ml-auto items-center flex space-x-4">

@@ -32,46 +32,52 @@ const calcPrice = (items: CartItem[]) => {
 
 // 2. Add item to cart
 export async function addItemToCart(input: CartItem) {
-  const data = cartItemSchema.parse(input)
+  const data = cartItemSchema.parse(input);
 
-// 2.1 Fetch product and validate
-const product = await prisma.product.findUnique({
-  where: { id: data.productId },
-  select: { id: true, price: true, stock: true },
-});
-if (!product) throw new Error("Product not found");
+  // 2.1 Fetch product and validate
+  const product = await prisma.product.findUnique({
+    where: { id: data.productId },
+    select: { id: true, price: true, stock: true },
+  });
+
+  if (!product) throw new Error("Product not found");
 
   // 3. Auth or Guest Session Handling
-const session = await getServerSession(authOptions);
-const userId: string | undefined = session?.user?.id;
-let sessionCartId: string | undefined;
-
-if (!userId) {
+  const session = await getServerSession(authOptions);
+  const userId: string | undefined = session?.user?.id;
   const cookieStore = await cookies();
-  sessionCartId = cookieStore.get("sessionCartId")?.value;
+  let sessionCartId = cookieStore.get("sessionCartId")?.value;
 
-  if (!sessionCartId) {
+  if (!userId && !sessionCartId) {
     sessionCartId = randomUUID();
     cookieStore.set("sessionCartId", sessionCartId, {
       path: "/",
       httpOnly: true,
       sameSite: "lax",
-      maxAge: 60 * 60 * 24 * 7,
+      maxAge: 60 * 60 * 24 * 7, // 1 week
     });
   }
-}
 
-const sessionCartIdToUse = sessionCartId ?? randomUUID();
+  const sessionCartIdToUse = sessionCartId ?? randomUUID();
 
-  // 4. Upsert Cart
-  const existingCart = await prisma.cart.findFirst({
+  // 🛡 4. Check user existence if logged in
+  if (userId) {
+    const userExists = await prisma.user.findUnique({ where: { id: userId } });
+    if (!userExists) {
+      console.warn("⚠️ Tried to create cart with non-existent user ID:", userId);
+      return {
+        success: false,
+        message: "Invalid user session. Please sign in again.",
+      };
+    }
+  }
+
+  // 5. Upsert Cart
+  let cart = await prisma.cart.findFirst({
     where: userId ? { userId } : { sessionCartId: sessionCartIdToUse },
   });
-  
-  let cart;
-  if (existingCart) {
-    cart = existingCart;
-  } else {
+
+  if (!cart) {
     cart = await prisma.cart.create({
       data: {
         userId: userId ?? null,
@@ -84,6 +90,7 @@ const sessionCartIdToUse = sessionCartId ?? randomUUID();
       },
     });
   }
+
   
   // 🔄 5. Merge items (and check stock)
 const existingItems = cart.items as CartItem[];

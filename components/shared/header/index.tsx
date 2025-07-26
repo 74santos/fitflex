@@ -43,12 +43,15 @@ export default function Header() {
     }
   }, [setCartQty])
 
-
   if (!mounted) return null
-  const currentTheme = theme === 'system' ? systemTheme : theme
-  const logoSrc = currentTheme === 'dark'
-    ? '/images/fwhtlogo.png' // 👈 replace with your dark logo
-    : '/images/logo.png'      // 👈 light/default logo
+
+  const currentTheme = theme === "system" ? systemTheme : theme;
+
+const logoSrc =
+  currentTheme === "dark"
+    ? "/images/fwhtlogo.png"
+    : "/images/logo.png";
+
 
   return (
     <header className=" bg-secondary shadow-sm sticky top-0 z-50">
@@ -58,6 +61,7 @@ export default function Header() {
           className="cursor-pointer"
         >
           <Image
+           key={logoSrc}
             src={logoSrc}
             alt={`${APP_NAME} logo`}
             width={140}

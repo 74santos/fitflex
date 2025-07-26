@@ -13,8 +13,7 @@ export default function UserLayout({
  
 
   return (
-
-
+    
     <div className="flex flex-col">
      <div className="bg-secondary shadow-sm ">
      <div className="border-b container mx-auto">

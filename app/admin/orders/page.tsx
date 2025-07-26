@@ -37,7 +37,7 @@ export default async function AdminOrderspage(props: {
        <TableHeader>
          <TableRow>
            <TableHead>ID</TableHead>
-           <TableHead>Date</TableHead>
+           <TableHead>DATE</TableHead>
            <TableHead>TOTAL</TableHead>
            <TableHead>PAID</TableHead>
            <TableHead>DELIVERED</TableHead>

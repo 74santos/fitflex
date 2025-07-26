@@ -9,7 +9,7 @@ export default async function CartPage() {
 const cart = await getCart()
 
 if (!cart) {
-  return <div>Cart is empty</div>
+  return <div className="wrapper pt-4">Cart is empty</div>
 }
 
   return (
