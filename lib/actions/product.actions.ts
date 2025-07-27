@@ -1,6 +1,6 @@
 'use server';
 
-// import { PrismaClient } from '@/lib/generated/prisma'; // or relative: '../../lib/generated/prisma'
+import { Prisma } from '../generated/prisma';
 
 import { prisma } from '@/db/prisma';
 import { convertToPlainObject } from '../utils';
@@ -44,29 +44,47 @@ export async function getProductById(productId: string) {
 
 // Get all products
 export async function getAllProducts({
-  
+  query,
   limit = PAGE_SIZE,
   page,
-  
-} : {
+  category
+}: {
   query: string;
   limit?: number;
   page: number;
-  category?: string
+  category?: string;
 }) {
+  const where: Prisma.ProductWhereInput = {
+    ...(query && {
+      name: {
+        contains: query,
+        mode: 'insensitive', // case-insensitive match
+      },
+    }),
+    ...(category && {
+      category: {
+        equals: category,
+        mode: 'insensitive',
+      },
+    }),
+  };
+
   const data = await prisma.product.findMany({
+    where,
     orderBy: { createdAt: 'desc' },
     skip: (page - 1) * limit,
-    take: limit
-  })
+    take: limit,
+  });
 
-  const dataCount = await prisma.product.count()
+  const dataCount = await prisma.product.count({ where });
 
   return {
     data,
-    totalPages: Math.ceil(dataCount / limit)
-  }
+    totalPages: Math.ceil(dataCount / limit),
+  };
 }
+
+
 
 // Delete a product
 export async function deleteProduct(id: string) {
@@ -137,4 +155,19 @@ export async function updateProduct(data: z.infer<typeof updateProductSchema>) {
       message: formatError(error)
     }
   }
+}
+
+//Get all categories
+
+export async function getAllCategories() {
+  const data = await prisma.product.groupBy({
+    by: ['category'],
+    _count: true,
+  })
+
+  // Make it serializable
+  return data.map(({ category, _count }) => ({
+    category,
+    count: _count,
+  }))
 }

@@ -14,6 +14,7 @@ import { revalidatePath } from "next/cache"
 import { formatError } from "../serverUtils"
 import { PAGE_SIZE } from "../constants"
 import { Decimal } from '@prisma/client/runtime/library';
+import { Prisma } from '../generated/prisma';
 
 export async function createOrder() {
   const session = await getServerSession(authOptions)
@@ -308,19 +309,35 @@ export async function getOrderSummary() {
 export async function getAllOrders({
   limit = PAGE_SIZE,
   page,
+  query
 }:{
   limit?: number;
-  page: number
+  page: number;
+  query: string
 }) {
 
+  const queryFilter: Prisma.OrderWhereInput = query && query !== 'all' ? {
+    user: {
+      name: {
+        contains: query,
+        mode: 'insensitive'
+      } 
+    }
+  } : {}
+
   const data = await prisma.order.findMany({
+    where:  {
+      ...queryFilter,
+    },
     take: limit,
     skip: (page - 1) * limit,
     orderBy: { createdAt: 'desc' },
     include: { user: {select:{name:true}} }
   })
 
-  const dataCount = await prisma.order.count()
+  const dataCount = await prisma.order.count({
+    where: queryFilter,
+  });
 
   return {
     data,

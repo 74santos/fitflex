@@ -4,18 +4,20 @@ import { Button } from "@/components/ui/button"
 import { FormControl, FormField, FormItem, FormLabel, FormMessage, Form } from "@/components/ui/form"
 import { Input } from "@/components/ui/input"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
+import { updateUser } from "@/lib/actions/user.actions"
 import { USER_ROLES } from "@/lib/constants"
 import { updateUserSchema } from "@/lib/validators"
 import { zodResolver } from "@hookform/resolvers/zod"
-// import { useRouter } from "next/navigation"
+import { useRouter } from "next/navigation"
 import {   ControllerRenderProps, useForm } from "react-hook-form"
+import { toast } from "sonner"
 
 import * as z from "zod"
 
 export default function UpdateUserForm({user}:{user: z.infer<typeof updateUserSchema>}) {
 
 
-  // const router = useRouter()
+  const router = useRouter()
   const form = useForm<z.infer<typeof updateUserSchema>>({
     resolver: zodResolver(updateUserSchema),
     defaultValues: user,
@@ -23,8 +25,27 @@ export default function UpdateUserForm({user}:{user: z.infer<typeof updateUserSc
 
   if (!user) return null
 
-  const onSubmit = () => {
-    return;
+  const onSubmit = async (values: z.infer<typeof updateUserSchema>) => {
+    try {
+      // Attempt to update the user with the form values + user ID
+      const res = await updateUser({
+        ...values,
+        id: user.id
+      })
+
+
+       // If the update failed, show an error toast
+      if(!res.success) {
+        return toast.error(res.message || "Update failed." )
+      }
+
+      toast.success(res.message)
+      form.reset(values); // instead of form.reset()
+      router.push('/admin/users')
+    } catch (error) {
+      toast.error((error as Error).message)
+      console.error("Update user error:", error);
+    }
   }
 
   return (

@@ -3,114 +3,93 @@
 import Link from "next/link";
 import Image from "next/image";
 import { useState, useEffect } from "react";
-// import { Menu, X} from "lucide-react";
 import { APP_NAME } from "@/lib/constants";
 import MenuSheet from "./menu";
 import { useTheme } from "next-themes";
-import type { CartItem } from "@/types"
+import type { CartItem } from "@/types";
+
+import CategoryDrawer from "./category-drawer"
 
 export default function Header() {
-  const { theme, systemTheme } = useTheme()
-  // const {isOpen, setIsOpen} = useState(false)
+  const { theme, systemTheme } = useTheme();
   const [mounted, setMounted] = useState(false);
-  const [cartQty, setCartQty] = useState(0)
-
+  const [cartQty, setCartQty] = useState(0);
+  const [categories, setCategories] = useState([]);
+  
   useEffect(() => {
-    setMounted(true)
-  
-    async function fetchCart() {
-      try {
-        const res = await fetch("/api/cart")
-        const cart = await res.json()
-        const totalQty = cart?.items?.reduce(
-          (sum: number, item: CartItem) => sum + item.qty,
-          0
-        ) || 0
-        setCartQty(totalQty)
-      } catch (error) {
-        console.error("Failed to fetch cart:", error)
-      }
-    }
-  
-    fetchCart()
-  
-    // 👂 Listen for cart updates
-    const onCartUpdate = () => fetchCart()
-    document.addEventListener("cart-updated", onCartUpdate)
-  
-    return () => {
-      document.removeEventListener("cart-updated", onCartUpdate)
-    }
-  }, [setCartQty])
+    setMounted(true);
 
-  if (!mounted) return null
+    const fetchCart = async () => {
+      try {
+        const res = await fetch("/api/cart");
+        const cart = await res.json();
+        const totalQty =
+          cart?.items?.reduce((sum: number, item: CartItem) => sum + item.qty, 0) || 0;
+        setCartQty(totalQty);
+      } catch (error) {
+        console.error("Failed to fetch cart:", error);
+      }
+    };
+
+    const fetchCategories = async () => {
+      try {
+        const res = await fetch("/api/categories");
+        const data = await res.json();
+        setCategories(data || []);
+      } catch (error) {
+        console.error("Failed to fetch categories:", error);
+      }
+    };
+
+    fetchCart();
+    fetchCategories();
+
+    const onCartUpdate = () => fetchCart();
+    document.addEventListener("cart-updated", onCartUpdate);
+
+    return () => {
+      document.removeEventListener("cart-updated", onCartUpdate);
+    };
+  }, []);
+
+  if (!mounted) return null;
 
   const currentTheme = theme === "system" ? systemTheme : theme;
-
-const logoSrc =
-  currentTheme === "dark"
-    ? "/images/fwhtlogo.png"
-    : "/images/logo.png";
-
+  const logoSrc = currentTheme === "dark" ? "/images/fwhtlogo.png" : "/images/logo.png";
 
   return (
-    <header className=" bg-secondary shadow-sm sticky top-0 z-50">
+    <header className="bg-secondary shadow-sm sticky top-0 z-50">
+      
       <div className="max-w-screen-xl mx-auto px-4 sm:px-6 lg:px-4 flex items-center justify-between h-16">
-        <Link
-          href="/"
-          className="cursor-pointer"
-        >
-          <Image
-           key={logoSrc}
-            src={logoSrc}
-            alt={`${APP_NAME} logo`}
-            width={140}
-            height={140}
-            className="mr-2"
-            priority
-            unoptimized
-            style={{ display: "block" }} // avoid inline invisibility
-          />
+        <div className="flex items-center">
+          <CategoryDrawer categories={categories} />
+          <Link href="/" className="cursor-pointer ml-4">
+            <Image
+              key={logoSrc}
+              src={logoSrc}
+              alt={`${APP_NAME} logo`}
+              width={140}
+              height={140}
+              className="mr-2"
+              priority
+              unoptimized
+              style={{ display: "block" }}
+            />
+          </Link>
+        </div>
 
-       
-        </Link>
-
-        {/* Desktop Navigation */}
         <nav className="hidden md:flex space-x-6">
-          <Link
-            href="/products"
-            className=" hover:text-black transition"
-          >
-            Products
-          </Link>
-          <Link
-            href="/about"
-            className=" hover:text-black transition"
-          >
-            About
-          </Link>
-          <Link
-            href="/contact"
-            className=" hover:text-black transition"
-          >
-            Contact
-          </Link>
+          <Link href="/products" className="hover:text-black transition">Products</Link>
+          <Link href="/about" className="hover:text-black transition">About</Link>
+          <Link href="/contact" className="hover:text-black transition">Contact</Link>
         </nav>
 
-        {/* Icons */}
-       
-        <MenuSheet cartQty={cartQty}/>
-        
-     
-
+        <MenuSheet cartQty={cartQty} />
       </div>
-
-      
-
-
     </header>
   );
 }
+
 
 
 

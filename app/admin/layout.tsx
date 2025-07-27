@@ -3,7 +3,7 @@ import ThemeSwitcher from '@/components/themeSwitcher'
 import Link from "next/link";
 import Menu from "@/components/shared/header/menu"
 import MainNav from "@/app/admin/main-nav"
-import { Input } from '@/components/ui/input';
+import AdminSearch from '@/components/admin/admin-search';
 
 export default function AdminLayout({
   children,
@@ -30,11 +30,7 @@ export default function AdminLayout({
         <MainNav className="mx-6" />
         <div className="ml-auto items-center flex space-x-4">
           <div>
-            <Input
-              type="search"
-              placeholder="Search..."
-              className="md:w-[100px] lg:w-[300px]"
-            />
+            <AdminSearch />
           </div>
           <Menu cartQty={0}/>
         </div>
