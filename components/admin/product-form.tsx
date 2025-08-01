@@ -171,93 +171,147 @@ export default function ProductForm({type, product, productId}:{
           />
         </div>
 
-        <div className="upload-field flex flex-col md:flex-row gap-5">
-          {/* Images */}
-          <FormField
-          control={form.control}
-          name='images'
-          render={() => (
-            <FormItem className="w-full ">
-              <FormLabel>Images</FormLabel>
-             <Card className='rounded-md'>
-              <CardContent className="space-y-2 mt-2 min-h-48 ">
-                <div className="flex space-x-2">
-                  { images.map((image:string)=> (
-                    <Image 
-                    key={image} 
-                    src={image} 
-                    alt='product image' 
-                    className='w-20 h-20 object-cover rounded-md'
-                    width={100}
-                    height={100}
-                    unoptimized
-                    />
-                  )) }
-                  <FormControl>
-                    <UploadButton
-                    endpoint='imageUploader'
-                    onClientUploadComplete={(res: {url:string}[]) => {
-                      form.setValue('images', [...images, res[0].url])
-                      }
-                    }
-                   onUploadError={(error: Error) => {
-                      toast.error(`ERROR! ${error.message}`)
-                    }}
-                    />
-                    
-                  </FormControl>
-                </div>
-              </CardContent>
-             </Card>
-            </FormItem>
-          )}
-          />
-        </div>
-        <div className="upload-field ">
-          {/* isFeatured */}
-          Featured Product
-          <Card>
-            <CardContent className="space-y-2 mt-2">
-              <FormField
-                control={form.control}
-                name="isFeatured"
-                render={({ field }) => (
-                  <FormItem className="flex space-x-2 items-center">
-                    <FormControl>
-                      <Checkbox
-                        checked={field.value}
-                        onCheckedChange={field.onChange}
-                      />
-                    </FormControl>
-                    <FormLabel>Is Featured?</FormLabel>
-                  </FormItem>
-                )}
-              />
-              {isFeatured && banner && (
-                <Image
-                  src={banner}
-                  alt="Banner image"
-                  width={1920}
-                  height={680}
-                  className="w-full h-16 object-cover object-center rounded-sm"
-                />
-              )}
 
-              {isFeatured && !banner && (
-               <UploadButton
-               endpoint='imageUploader'
-               onClientUploadComplete={(res: {url:string}[]) => {
-                 form.setValue('banner', res[0].url)
-                 }
-               }
-              onUploadError={(error: Error) => {
-                 toast.error(`ERROR! ${error.message}`)
-               }}
-               />
-              )}
+ {/* Images */}
+         {/* ---- Images Upload & Management ---- */}
+  <div className="upload-field flex flex-col md:flex-row gap-5">
+    <FormField
+      control={form.control}
+      name="images"
+      render={() => (
+        <FormItem className="w-full">
+          <FormLabel>Images</FormLabel>
+          <Card className="rounded-md">
+            <CardContent className="space-y-2 mt-2 min-h-48">
+              <div className="flex flex-wrap gap-4">
+                {images.map((url, idx) => (
+                  <div key={url} className="relative group w-24 h-24 ">
+                    <Image
+                      src={url}
+                      alt={`Image ${idx + 1}`}
+                      width={100}
+                      height={100}
+                      className="object-cover rounded-md"
+                      unoptimized
+                    />
+                    <UploadButton
+                      endpoint="imageUploader"
+                      onClientUploadComplete={(res) => {
+                        form.setValue(
+                          "images",
+                          images.map((v, i) => (i === idx ? res[0].ufsUrl : v))
+                        );
+                        toast.success("Image replaced");
+                      }}
+                      onUploadError={(err) => void toast.error(`Upload failed: ${err.message}`)}
+                      className="absolute inset-0 opacity-0 group-hover:opacity-80   bg-black/30 cursor-pointer rounded-md "
+                    />
+                    <button
+                      type="button"
+                      onClick={async () => {
+                        const key = url.split("/").pop();
+                        await fetch("/api/remove-image", {
+                          method: "POST",
+                          headers: { "Content-Type": "application/json" },
+                          body: JSON.stringify({ key }),
+                        });
+                        form.setValue(
+                          "images",
+                          images.filter((_, i) => i !== idx)
+                        );
+                        toast.success("Image deleted");
+                      }}
+                      className="absolute top-0 right-0 bg-red-300 text-white  rounded-full w-6 h-6 flex items-center justify-center text-sm"
+                    >
+                      ×
+                    </button>
+                  </div>
+                ))}
+                <UploadButton
+                  endpoint="imageUploader"
+                  onClientUploadComplete={(res) =>
+                    form.setValue("images", [...images, res[0].ufsUrl])
+                  }
+                  onUploadError={(err) => {
+                    toast.error(`Upload failed: ${err.message}`);
+                    return;
+                  }}
+                  className="w-24 h-24 border-2 border-dashed rounded-md flex items-center justify-center cursor-pointer "
+                />
+              </div>
             </CardContent>
           </Card>
-        </div>
+        </FormItem>
+      )}
+    />
+  </div>
+
+  {/* ---- Featured Banner Section ---- */}
+  <div className="upload-field ">
+    <FormField
+      control={form.control}
+      name="isFeatured"
+      render={({ field }) => (
+        <FormItem className="flex space-x-2 items-center">
+          <FormControl>
+            <Checkbox
+              checked={field.value}
+              onCheckedChange={field.onChange}
+            />
+          </FormControl>
+          <FormLabel>Is Featured?</FormLabel>
+        </FormItem>
+      )}
+    />
+
+    {isFeatured && (
+      <Card>
+        <CardContent className="space-y-2 mt-2">
+          <div className="relative w-full h-40 rounded-md overflow-hidden group">
+            {banner && (
+              <Image
+                src={banner}
+                alt="Banner image"
+                fill
+                className="object-cover"
+                unoptimized
+              />
+            )}
+            <UploadButton
+              endpoint="imageUploader"
+              onClientUploadComplete={(res) => {
+                form.setValue("banner", res[0].ufsUrl);
+                toast.success("Banner updated");
+              }}
+              onUploadError={(err) => {
+                toast.error(`Upload failed: ${err.message}`);
+                return;
+              }}
+              className="absolute inset-0 opacity-0 group-hover:opacity-80 bg-black/30 cursor-pointer"
+            />
+            {banner && (
+              <button
+                type="button"
+                onClick={async () => {
+                  const key = banner.split("/").pop();
+                  await fetch("/api/remove-image", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ key }),
+                  });
+                  form.setValue("banner", "");
+                  toast.success("Banner deleted");
+                }}
+                className="absolute top-2 right-2 bg-red-400 text-white rounded-full w-6 h-6 flex items-center justify-center text-sm"
+              >
+                ×
+              </button>
+            )}
+          </div>
+        </CardContent>
+      </Card>
+    )}
+  </div>
         <div>
           {/* Description */}
           <FormField

@@ -7,7 +7,7 @@ import { APP_NAME } from "@/lib/constants";
 import MenuSheet from "./menu";
 import { useTheme } from "next-themes";
 import type { CartItem } from "@/types";
-
+import Search from "./search";
 import CategoryDrawer from "./category-drawer"
 
 export default function Header() {
@@ -78,11 +78,9 @@ export default function Header() {
           </Link>
         </div>
 
-        <nav className="hidden md:flex space-x-6">
-          <Link href="/products" className="hover:text-black transition">Products</Link>
-          <Link href="/about" className="hover:text-black transition">About</Link>
-          <Link href="/contact" className="hover:text-black transition">Contact</Link>
-        </nav>
+        <div className="hidden md:block" >
+        <Search categories={categories} />
+          </div> 
 
         <MenuSheet cartQty={cartQty} />
       </div>
