@@ -24,7 +24,7 @@ export default function CategoryDrawer({ categories }: Props) {
   const [open, setOpen] = useState(false);
 
   const handleClick = (category: string) => {
-    router.push(`/products?category=${encodeURIComponent(category)}`);
+    router.push(`/search?category=${encodeURIComponent(category)}`);
     setOpen(false);
   };
 

@@ -3,6 +3,7 @@ import Image from "next/image"
 import { Card, CardContent, CardHeader } from "@/components/ui/card"
 import ProductPrice from "./product-price"
 import { Product } from "@/types"
+import Rating from "./rating"
 
 export default function ProductCard({product}: {product: Product}) {
   return (
@@ -24,7 +25,8 @@ export default function ProductCard({product}: {product: Product}) {
       <div className="text-xs"> {product.category} </div>
       <Link href={`/product/${product.slug}`}>
       <h2 className="text-md font-medium">{product.name}</h2></Link>
-      <div className="flex justify-between gap-4"><p>{product.rating} Stars</p>
+      <div className="flex justify-between gap-4">
+        <Rating value={Number(product.rating)}/>
       {product.stock > 0 ? (
         <ProductPrice value={Number(product.price)} />
       ) : (
