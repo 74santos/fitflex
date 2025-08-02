@@ -50,7 +50,7 @@ export async function getAllProducts({
   category,
   price,
   rating,
- // sort
+  sort,
 }: {
   query: string;
   limit?: number;
@@ -64,27 +64,42 @@ export async function getAllProducts({
     ...(query && {
       name: {
         contains: query,
-        mode: 'insensitive', // case-insensitive match
+        mode: "insensitive", // ensures case-insensitive comparison
       },
     }),
-    ...(category && {
+    ...(category && category !== "all" && {
       category: {
         equals: category,
-        mode: 'insensitive',
+        mode: "insensitive",
       },
     }),
-    ...(price && price.includes('-') && (() => {
-      const [min, max] = price.split('-').map(Number);
-      return { price: { gte: min, lte: max } };
-    })()),
-    ...(rating && !isNaN(Number(rating)) && {
+    ...(
+      price &&
+      price !== "all" &&
+      price.includes("-") &&
+      (() => {
+        const [min, max] = price.split("-").map(Number);
+        return {
+          price: { gte: min, lte: max },
+        };
+      })()
+    ),
+    ...(rating && rating !== "all" && !isNaN(+rating) && {
       rating: { gte: Number(rating) },
     }),
   };
+  
 
   const data = await prisma.product.findMany({
     where,
-    orderBy: { createdAt: 'desc' },
+    orderBy: 
+      sort === 'lowest'
+        ? { price: 'asc' }
+        : sort === 'highest'
+        ? { price: 'desc' }
+        : sort === 'rating'
+        ? { rating: 'desc' }
+        : { createdAt: 'desc' },
     skip: (page - 1) * limit,
     take: limit,
   });
