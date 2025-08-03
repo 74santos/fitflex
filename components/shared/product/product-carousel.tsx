@@ -23,7 +23,7 @@ export default function ProductCarousel({ data }: { data: Product[] }) {
         {data.map((product: Product) => (
           <CarouselItem key={product.id}>
             <Link href={`/product/${product.slug}`}>
-              <div className="relative w-full max-w-screen-2xl  h-[350px] mt-4">
+              <div className="relative w-full max-w-screen-2xl  md:h-[350px] h-[150px] mt-4  ">
                 <Image
                   src={product.banner!}
                   alt={product.name}
