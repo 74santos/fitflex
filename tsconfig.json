@@ -30,6 +30,6 @@
     ".next/types/**/*.ts",
     "types",
     "lib/generated"   
-  ],
+, "app/(root)/orders/[id]/stripe-payment-success"  ],
   "exclude": ["node_modules"]
 }

@@ -12,9 +12,21 @@ import { useTransition } from "react";
 import { PayPalScriptProvider, PayPalButtons , usePayPalScriptReducer } from "@paypal/react-paypal-js";
 import { createPayPalOrder, approvePayPalOrder, updatedOrderToPaidCOD, deliverOrder} from "@/lib/actions/order.actions";
 import { toast } from "sonner";
+import StripePayment from "./stripe-payment";
 
-export default function OrderDetailsTable({ order, paypalClientId, isAdmin }: { order: Order; paypalClientId: string; isAdmin: boolean }) {
 
+
+export default function OrderDetailsTable({ 
+  order,
+  paypalClientId, 
+  isAdmin, 
+  stripeClientSecret 
+}: { 
+  order: Order; 
+  paypalClientId: string; 
+  isAdmin: boolean;  
+  stripeClientSecret: string | null
+}) {
   const {
     id,
     shippingAddress,
@@ -218,6 +230,19 @@ export default function OrderDetailsTable({ order, paypalClientId, isAdmin }: { 
                           </PayPalScriptProvider> 
                           </div>
                         )}
+
+                      {/* Stripe Payment*/}
+                        {
+                          !isPaid && paymentMethod === 'Stripe' && stripeClientSecret && (
+                            <StripePayment
+                              priceInCents={Number(order.totalPrice) * 100}
+                              orderId={order.id}  
+                              clientSecret={stripeClientSecret}                      
+                                />
+                          )
+                        }
+
+
                       {/* Cash on Delivery */}
                       {
                         isAdmin && !isPaid && paymentMethod === 'CashOnDelivery' && (
