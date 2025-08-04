@@ -38,9 +38,13 @@ export default async function OrderDetailsPage(props: { params: Promise<{ id: st
 
   const address = order.shippingAddress as ShippingAddress;
 
+  type OrderDetails = Omit<Order, "paymentResult"> & { userId?: string };
+
+  
+
   return (
     <OrderDetailsTable
-      order={{ ...order, shippingAddress: address } as Order}
+      order={{ ...order, shippingAddress: address } as OrderDetails}
       stripeClientSecret={client_secret}
       paypalClientId={process.env.PAYPAL_CLIENT_ID || 'sb'}
       isAdmin={ session?.user?.role === 'admin' || false }

@@ -16,13 +16,14 @@ import StripePayment from "./stripe-payment";
 
 
 
+
 export default function OrderDetailsTable({ 
   order,
   paypalClientId, 
   isAdmin, 
   stripeClientSecret 
 }: { 
-  order: Order; 
+  order: Omit<Order, 'paymentResult'>; 
   paypalClientId: string; 
   isAdmin: boolean;  
   stripeClientSecret: string | null
