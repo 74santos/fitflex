@@ -17,6 +17,11 @@ import { Order } from "@/types";
 import { formatCurrency } from "@/lib/utils";
 import sampleData from "@/db/sample-data";
 
+type OrderInformationProps = {
+  order: Order
+}
+
+
 PurchaseReceiptEmail.PreviewProps = {
   order: {
     id: crypto.randomUUID(),
@@ -64,11 +69,12 @@ const dateFormatter = new Intl.DateTimeFormat("en-US", {
   dateStyle: "medium",
 })
 
-type OrderInformationProps = {
-  order: Order
-}
+const BASE_URL = process.env.NEXT_PUBLIC_SERVER_URL || "https://fitflex-phi.vercel.app"; // fallback for react-email preview http://localhost:3000
+
 
 export default function PurchaseReceiptEmail({order}: OrderInformationProps) {
+
+
   return (
     <Html>
       <Preview>View order receipt</Preview>
@@ -109,10 +115,14 @@ export default function PurchaseReceiptEmail({order}: OrderInformationProps) {
 
             <Section className="border border-solid border-gray-500 rounded-lg p-4 md:p-6 my-4">
               { order.orderitems.map((item) => (
+
+                
                 <Row key={item.productId} className="mt-8">
                   <Column className="w-20"> 
                   <Img
-                    src={item.image.startsWith('/') ? `${process.env.NEXT_PUBLIC_APP_URL}${item.image}` : item.image}
+                    src={item.image.startsWith('/')
+                     ? `${BASE_URL}${item.image}` 
+                     : item.image}
                     alt={item.name}
                     width="80"
                     height="80"

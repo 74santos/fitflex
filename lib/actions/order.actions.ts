@@ -8,13 +8,14 @@ import { getUserById } from "./user.actions"
 import { insertOrderSchema } from "../validators"
 import { prisma } from "@/db/prisma"
 import { convertToPlainObject } from "../utils"
-import {  PaymentResult } from "@/types"
+import {  PaymentResult, ShippingAddress } from "@/types"
 import { paypal } from "../paypal"
 import { revalidatePath } from "next/cache"
 import { formatError } from "../serverUtils"
 import { PAGE_SIZE } from "../constants"
 import { Decimal } from '@prisma/client/runtime/library';
 import { Prisma } from '../generated/prisma';
+import { sendPurchaseReceipt } from "@/email"
 
 export async function createOrder() {
   const session = await getServerSession(authOptions)
@@ -221,6 +222,19 @@ export async function updateOrderToPaid({
   })
 
   if (!updateOrder) throw new Error('Order not found')
+    if (!updateOrder.user) {
+      throw new Error('User not found')
+    }
+  
+  sendPurchaseReceipt({
+    order: {
+      ...updateOrder,
+      user: updateOrder.user, 
+      userId: updateOrder.userId as string, // add a type assertion here
+      shippingAddress: updateOrder.shippingAddress as ShippingAddress,
+      paymentResult: updateOrder.paymentResult as PaymentResult,
+    }
+  })
 }
 
 // Get user's order
